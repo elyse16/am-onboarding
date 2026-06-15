@@ -1,0 +1,753 @@
+<!DOCTYPE html>
+<script type="application/json" id="cowork-artifact-meta">
+{
+  "name": "AM Onboarding Hub",
+  "schemaVersion": 1,
+  "description": "Account Manager onboarding dashboard with six tabs: (1) two-week program schedule, (2) live reference data (subscriber counts, sponsors, placement types, tool stack), (3) AM playbook covering the pod role, campaign delivery, reporting, renewals, incrementals/expansion, and QBRs, (4) async doc resources, (5) hands-on exercise materials, (6) SME roster by domain. Forked from the AE Sales Onboarding Hub for the post-sale AM motion. Data as of Q2 2026."
+}
+</script>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AM Onboarding Hub — TLDR</title>
+<style>
+:root { color-scheme: light; }
+@import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700&display=swap');
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  font-family: 'Nunito', -apple-system, BlinkMacSystemFont, sans-serif;
+  background: #f8f9fb; color: #1a1a2e; padding: 20px; line-height: 1.5;
+}
+
+/* Header */
+.header { margin-bottom: 24px; padding-bottom: 16px; border-bottom: 2px solid #eee; }
+.logo { font-size: 22px; font-weight: 700; letter-spacing: -0.5px; }
+.logo .accent { color: #d513eb; }
+
+/* Tabs */
+.tabs { display: flex; gap: 0; margin-bottom: 24px; border-bottom: 2px solid #eee; overflow-x: auto; }
+.tab {
+  padding: 10px 16px; cursor: pointer; font-weight: 600; font-size: 13px;
+  color: #666; border-bottom: 2px solid transparent; margin-bottom: -2px;
+  transition: all 0.2s; background: none; border-top: none; border-left: none;
+  border-right: none; white-space: nowrap;
+}
+.tab:hover { color: #d513eb; }
+.tab.active { color: #d513eb; border-bottom-color: #d513eb; }
+.tab-content { display: none; }
+.tab-content.active { display: block; }
+
+/* Cards */
+.card {
+  background: #fff; border: 1px solid #e8e8ee; border-radius: 12px;
+  padding: 20px; margin-bottom: 16px; box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+}
+.card-title { font-size: 16px; font-weight: 700; margin-bottom: 14px; padding-bottom: 10px; border-bottom: 1px solid #f0f0f4; }
+.card-title .accent { color: #d513eb; }
+
+/* Week cards */
+.week-header {
+  display: flex; justify-content: space-between; align-items: center;
+  cursor: pointer; margin-bottom: 12px;
+}
+.week-title { font-size: 16px; font-weight: 700; }
+.week-title .num { color: #d513eb; }
+.week-goal { font-size: 13px; color: #666; font-style: italic; margin-bottom: 14px; padding-bottom: 12px; border-bottom: 1px solid #f0f0f4; }
+.chevron { font-size: 18px; color: #999; transition: transform 0.2s; }
+.card.collapsed .chevron { transform: rotate(-90deg); }
+.card.collapsed .week-body, .card.collapsed .week-goal { display: none; }
+
+/* Schedule table */
+.sched-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+.sched-table th {
+  text-align: left; font-size: 11px; font-weight: 700; text-transform: uppercase;
+  letter-spacing: 0.5px; color: #999; padding: 8px 10px; border-bottom: 2px solid #eee;
+}
+.sched-table td { padding: 10px 10px; border-bottom: 1px solid #f0f0f4; vertical-align: top; }
+.sched-table tr:last-child td { border-bottom: none; }
+.sched-table .day { font-weight: 700; color: #d513eb; white-space: nowrap; width: 50px; }
+.sched-table .session-name { font-weight: 600; }
+.sched-table .session-desc { color: #555; margin-top: 2px; }
+.sched-table .lead { color: #666; white-space: nowrap; }
+
+/* Format tags */
+.fmt {
+  display: inline-block; font-size: 10px; font-weight: 700; padding: 2px 6px;
+  border-radius: 4px; margin-right: 4px; vertical-align: middle;
+}
+.fmt-live { background: #dbeafe; color: #1e40af; }
+.fmt-async { background: #ede9fe; color: #5b21b6; }
+.fmt-handson { background: #fce7f3; color: #9d174d; }
+
+/* Stats bar */
+.stats-bar { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 16px; }
+.stat-card { background: #fff; border: 1px solid #e8e8ee; border-radius: 10px; padding: 14px; text-align: center; }
+.stat-value { font-size: 22px; font-weight: 700; color: #d513eb; }
+.stat-label { font-size: 11px; color: #888; text-transform: uppercase; letter-spacing: 0.5px; margin-top: 2px; }
+
+/* Newsletter grid */
+.nl-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 10px; }
+.nl-card { background: #f8f9fb; border: 1px solid #eee; border-radius: 8px; padding: 12px; }
+.nl-name { font-size: 14px; font-weight: 700; margin-bottom: 4px; }
+.nl-subs { font-size: 18px; font-weight: 700; color: #d513eb; }
+.nl-freq { font-size: 12px; color: #888; margin-top: 2px; }
+
+/* Sponsors table */
+.data-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+.data-table th {
+  text-align: left; font-size: 11px; font-weight: 700; text-transform: uppercase;
+  letter-spacing: 0.5px; color: #999; padding: 8px 10px; border-bottom: 2px solid #eee;
+}
+.data-table td { padding: 8px 10px; border-bottom: 1px solid #f0f0f4; vertical-align: top; }
+.data-table tr:last-child td { border-bottom: none; }
+.data-table .clicks { font-weight: 600; color: #d513eb; }
+
+/* Placement types */
+.placement-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+.placement-card { background: #f8f9fb; border: 1px solid #eee; border-radius: 8px; padding: 14px; text-align: center; }
+.placement-name { font-size: 14px; font-weight: 700; margin-bottom: 4px; }
+.placement-desc { font-size: 12px; color: #666; }
+
+/* ICP & grid boxes */
+.two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.box { background: #f8f9fb; border-radius: 8px; padding: 14px; }
+.box-label { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: #999; margin-bottom: 6px; }
+.box-content { font-size: 13px; line-height: 1.7; }
+
+/* Tool grid */
+.tool-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 12px; }
+.tool-card { background: #f8f9fb; border: 1px solid #eee; border-radius: 8px; padding: 14px; }
+.tool-name { font-size: 14px; font-weight: 700; margin-bottom: 4px; }
+.tool-purpose { font-size: 13px; color: #666; line-height: 1.5; }
+.tool-doc { margin-top: 8px; font-size: 12px; }
+.tool-doc a { font-weight: 600; color: #d513eb; text-decoration: none; }
+.tool-doc a:hover { text-decoration: underline; }
+
+/* Freshness */
+.freshness { font-size: 11px; color: #999; text-align: right; margin-top: 8px; font-style: italic; }
+
+/* Resource list */
+.resource-item {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 12px 14px; border-bottom: 1px solid #f0f0f4;
+}
+.resource-item:last-child { border-bottom: none; }
+.resource-name { font-size: 14px; font-weight: 600; }
+.resource-status { font-size: 12px; }
+.resource-link {
+  display: inline-block; font-size: 12px; font-weight: 600; color: #d513eb;
+  text-decoration: none; padding: 4px 10px; border: 1px solid #d513eb;
+  border-radius: 6px; transition: all 0.2s;
+}
+.resource-link:hover { background: #d513eb; color: #fff; }
+.resource-placeholder {
+  display: inline-block; font-size: 11px; font-weight: 600; color: #999;
+  padding: 4px 10px; border: 1px dashed #ccc; border-radius: 6px;
+}
+.resource-owner { font-size: 12px; color: #888; margin-top: 2px; }
+
+/* Resource categories (Resources tab) */
+.resource-category { padding-top: 16px; margin-top: 16px; border-top: 1px solid #eee; }
+.resource-category:first-child { padding-top: 0; margin-top: 0; border-top: none; }
+.resource-cat-title { font-size: 14px; font-weight: 700; color: #1a1a2e; margin-bottom: 4px; line-height: 1.35; }
+.resource-cat-num { color: #d513eb; font-weight: 700; margin-right: 6px; }
+.resource-cat-desc { font-size: 12px; color: #777; margin-bottom: 8px; line-height: 1.45; }
+.resource-cat-title + .resource-item { margin-top: 6px; }
+.resource-category:last-child .resource-item:last-child { border-bottom: none; }
+
+/* Placeholder banner */
+.placeholder-banner {
+  background: #fef3c7; border: 1px dashed #f59e0b; border-radius: 8px;
+  padding: 12px 16px; font-size: 13px; color: #92400e; margin-bottom: 14px;
+}
+.placeholder-banner strong { font-weight: 700; }
+
+/* Exercise cards */
+.exercise-card { margin-bottom: 12px; }
+.exercise-week { font-size: 11px; font-weight: 600; color: #d513eb; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px; }
+.exercise-title { font-size: 15px; font-weight: 700; margin-bottom: 6px; }
+.exercise-desc { font-size: 13px; color: #555; line-height: 1.6; margin-bottom: 10px; }
+.exercise-placeholder {
+  background: #f8f9fb; border: 1px dashed #ccc; border-radius: 8px;
+  padding: 14px; font-size: 13px; color: #999; font-style: italic;
+}
+
+/* SME cards */
+/* Playbook */
+.pb-section { margin-bottom: 20px; }
+.pb-section-header { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
+.pb-num { width: 28px; height: 28px; background: rgba(213,19,235,0.1); border-radius: 6px; display: flex; align-items: center; justify-content: center; color: #d513eb; font-weight: 700; font-size: 12px; flex-shrink: 0; }
+.pb-title { font-size: 15px; font-weight: 700; }
+.pb-objective { background: #f8f9fb; border-left: 3px solid #d513eb; padding: 10px 14px; margin-bottom: 12px; font-size: 13px; color: #555; }
+.pb-objective strong { color: #1a1a2e; }
+.pb-h3 { font-size: 13px; font-weight: 700; color: #1a1a2e; margin: 14px 0 8px; text-transform: uppercase; }
+.pb-h3 .marker { color: #d513eb; margin-right: 6px; }
+.pb-p { font-size: 13px; color: #555; line-height: 1.7; margin-bottom: 8px; }
+.pb-ul { list-style: none; padding: 0; margin-bottom: 10px; }
+.pb-ul li { font-size: 13px; color: #555; line-height: 1.7; padding: 4px 0 4px 16px; position: relative; }
+.pb-ul li::before { content: ""; width: 5px; height: 5px; background: #d513eb; border-radius: 50%; position: absolute; left: 0; top: 12px; }
+.pb-ol { list-style: none; padding: 0; counter-reset: pblist; margin-bottom: 10px; }
+.pb-ol li { font-size: 13px; color: #555; line-height: 1.7; padding: 4px 0 4px 24px; position: relative; counter-increment: pblist; }
+.pb-ol li::before { content: counter(pblist); color: #d513eb; font-weight: 700; font-size: 11px; position: absolute; left: 0; top: 4px; width: 18px; height: 18px; background: rgba(213,19,235,0.1); border-radius: 50%; display: flex; align-items: center; justify-content: center; }
+.pb-callout { background: #fef3c7; border-left: 3px solid #f59e0b; border-radius: 0 8px 8px 0; padding: 10px 14px; margin: 10px 0; font-size: 13px; color: #92400e; }
+.pb-callout strong { color: #78350f; }
+.pb-card { background: #f8f9fb; border: 1px solid #eee; border-radius: 8px; padding: 12px 14px; margin-bottom: 8px; }
+.pb-card p { font-size: 13px; color: #555; margin-bottom: 6px; }
+.pb-card strong { color: #1a1a2e; }
+.pb-link { color: #d513eb; text-decoration: none; font-weight: 600; }
+.pb-link:hover { text-decoration: underline; }
+
+.sme-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 14px; }
+.sme-card { background: #f8f9fb; border: 1px solid #eee; border-radius: 10px; padding: 16px; }
+.sme-domain { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: #d513eb; margin-bottom: 4px; }
+.sme-name { font-size: 16px; font-weight: 700; margin-bottom: 8px; }
+.sme-links { margin-top: 8px; }
+.sme-links a { font-size: 12px; font-weight: 600; color: #d513eb; text-decoration: none; margin-right: 12px; }
+.sme-links a:hover { text-decoration: underline; }
+.sme-content { font-size: 12px; font-weight: 600; color: #888; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.3px; }
+.sme-topics { font-size: 13px; color: #555; line-height: 1.6; }
+.sme-topic-item { padding: 2px 0; }
+
+/* Section divider */
+.section-divider { margin: 20px 0 16px; padding-top: 16px; border-top: 1px solid #eee; }
+.section-title { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.8px; color: #999; margin-bottom: 12px; }
+
+.resource-tab-link {
+  background: none; border: none; padding: 0; margin: 0; font: inherit;
+  color: #d513eb; font-weight: 600; cursor: pointer; text-decoration: underline;
+}
+.resource-tab-link:hover { color: #b010c7; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="logo">TLDR<span class="accent">×</span>AM Onboarding Hub</div>
+</div>
+
+<div class="tabs">
+  <button class="tab active" onclick="switchTab('program')">Program Schedule</button>
+  <button class="tab" onclick="switchTab('reference')">TLDR at a Glance</button>
+  <button class="tab" onclick="switchTab('playbook')">AM Playbook</button>
+  <button class="tab" onclick="switchTab('resources')">Resources</button>
+  <button class="tab" onclick="switchTab('exercises')">Exercises</button>
+  <button class="tab" onclick="switchTab('smes')">Subject Matter Experts</button>
+</div>
+
+<!-- ==================== PROGRAM SCHEDULE ==================== -->
+<div id="program" class="tab-content active">
+
+  <div style="font-size:13px;color:#555;margin-bottom:14px;padding:14px 16px;background:#fff;border-radius:8px;border:1px solid #e8e8ee;line-height:1.7;">
+    Below is your two-week onboarding schedule — every session, exercise, and check-in mapped out. Week 1 builds the foundation: TLDR's business and audience, your role in the AE/AM pod, the lifecycle of a campaign, and the core tools (HubSpot, Sponsy, Cowork). Week 2 goes deep on the AM craft — how the systems connect, client reporting, and QBR building — with hands-on mock exercises. Pair this with your Role Expectations doc from Tyler, which covers your mandate, deliverables, and success criteria — that's the <em>what</em>. This is the <em>how</em>: what you'll actually be doing day-to-day to get there.
+    <br><br>
+    <span style="color:#999;">This schedule is subject to change. All live sessions are pre-scheduled on your calendar. You may also see additional 1:1s added with folks relevant to your book. Note: Week 2 is a short week around the July 4th holiday (Tyler OOO 6/30–7/3).</span>
+  </div>
+
+  <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px;padding:10px 14px;background:#fff;border-radius:8px;border:1px solid #e8e8ee;font-size:12px;color:#666;">
+    <span><span class="fmt fmt-live">LIVE</span> Live session</span>
+    <span><span class="fmt fmt-async">ASYNC</span> Self-paced</span>
+    <span><span class="fmt fmt-handson">HANDS-ON</span> Exercise</span>
+  </div>
+
+  <!-- WEEK 1 -->
+  <div class="card" onclick="toggleWeek(this)">
+    <div class="week-header">
+      <div class="week-title"><span class="num">Week 1</span> — AM Foundations</div>
+      <div class="chevron">&#9662;</div>
+    </div>
+    <div class="week-goal">Goal: Understand TLDR's business, your role in the pod, and the lifecycle of a campaign.</div>
+    <div class="week-body">
+      <table class="sched-table">
+        <thead><tr><th>Day</th><th>Session</th><th>Format</th><th>Lead</th></tr></thead>
+        <tbody>
+          <tr><td class="day">Mon</td><td><div class="session-name">Meet leadership</div><div class="session-desc">Meet your core people — Elyse W, Val, Dan, Tyler</div></td><td><span class="fmt fmt-live">LIVE</span></td><td class="lead">Leadership</td></tr>
+          <tr><td class="day">Mon</td><td><div class="session-name">Welcome to the team</div><div class="session-desc">Get to know TLDR, benefits, systems, and more</div></td><td><span class="fmt fmt-live">LIVE</span></td><td class="lead">People</td></tr>
+          <tr><td class="day">Mon</td><td><div class="session-name">AM team overview &amp; role expectations</div><div class="session-desc">How the AM team operates, your mandate, what good looks like</div></td><td><span class="fmt fmt-live">LIVE</span></td><td class="lead">Tyler</td></tr>
+          <tr><td class="day">Mon–Fri</td><td><div class="session-name">Self-study: Resources tab</div><div class="session-desc">Work through the foundations on your own time this week — TLDR business model, ICP, and the Sales FAQ. This is how you'll get to know TLDR, our audience, and what we sell.</div></td><td><span class="fmt fmt-async">ASYNC</span></td><td class="lead">Self-paced</td></tr>
+          <tr><td class="day">Tue</td><td><div class="session-name">Team introductions</div><div class="session-desc">Meet the AM team — Laura, Laurel, Stef</div></td><td><span class="fmt fmt-live">LIVE</span></td><td class="lead">Team</td></tr>
+          <tr><td class="day">Wed</td><td><div class="session-name">AM weekly team meeting</div><div class="session-desc">Your first standing AM team sync</div></td><td><span class="fmt fmt-live">LIVE</span></td><td class="lead">AM Team</td></tr>
+          <tr><td class="day">Wed</td><td><div class="session-name">Lifecycle of a campaign</div><div class="session-desc">End-to-end: handoff &rarr; kickoff &rarr; launch &rarr; delivery &rarr; wrap &rarr; renewal</div></td><td><span class="fmt fmt-live">LIVE</span> 45 min</td><td class="lead">Tyler</td></tr>
+          <tr><td class="day">Wed</td><td><div class="session-name">Deep dive: HubSpot / Sponsy</div><div class="session-desc">CRM and inventory from the AM seat. Homework: mock renewal deal in HubSpot. See Exercises tab.</div></td><td><span class="fmt fmt-async">ASYNC</span> <span class="fmt fmt-live">LIVE</span> 45 min</td><td class="lead">Stef</td></tr>
+          <tr><td class="day">Thu</td><td><div class="session-name">Cowork setup + verification</div><div class="session-desc">Install, plugins, slash commands — verified live</div></td><td><span class="fmt fmt-live">LIVE</span></td><td class="lead">Upashruti</td></tr>
+          <tr><td class="day">Thu</td><td><div class="session-name">AM call library</div><div class="session-desc">Watch four curated Attention calls across the AM motion. See Exercises tab.</div></td><td><span class="fmt fmt-handson">HANDS-ON</span></td><td class="lead">Self-paced</td></tr>
+          <tr><td class="day">Fri</td><td><div class="session-name">EOW check-in</div><div class="session-desc">Recap week 1, surface questions, set up week 2</div></td><td><span class="fmt fmt-live">LIVE</span></td><td class="lead">Tyler</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- WEEK 2 -->
+  <div class="card" onclick="toggleWeek(this)">
+    <div class="week-header">
+      <div class="week-title"><span class="num">Week 2</span> — Systems, Reporting &amp; QBRs</div>
+      <div class="chevron">&#9662;</div>
+    </div>
+    <div class="week-goal">Goal: Master the AM craft — how the systems connect, client reporting, and QBR building. Short week (July 4th).</div>
+    <div class="week-body">
+      <table class="sched-table">
+        <thead><tr><th>Day</th><th>Session</th><th>Format</th><th>Lead</th></tr></thead>
+        <tbody>
+          <tr><td class="day">Mon</td><td><div class="session-name">Weekly sync</div><div class="session-desc">Week 2 plan and priorities. Self-learning this week: Objection Handling, Measuring NL Success, Creative Best Practices, AM team meeting decks, previous team trainings (Resources tab).</div></td><td><span class="fmt fmt-live">LIVE</span> <span class="fmt fmt-async">ASYNC</span></td><td class="lead">Tyler</td></tr>
+          <tr><td class="day">Mon</td><td><div class="session-name">Systems we use and how they connect</div><div class="session-desc">HubSpot, Sponsy, Email Octopus, Metabase, Windmill, Attention — how the AM stack fits together</div></td><td><span class="fmt fmt-live">LIVE</span></td><td class="lead">Marco</td></tr>
+          <tr><td class="day">Tue</td><td><div class="session-name">Reporting</div><div class="session-desc">Client-facing performance reports. Homework: mock client report + email. See Exercises tab.</div></td><td><span class="fmt fmt-live">LIVE</span></td><td class="lead">Laura</td></tr>
+          <tr><td class="day">Tue</td><td><div class="session-name">Team introductions</div><div class="session-desc">Meet more of the team</div></td><td><span class="fmt fmt-live">LIVE</span></td><td class="lead">Team</td></tr>
+          <tr><td class="day">Wed</td><td><div class="session-name">Deep dive: How the AM team uses Claude</div><div class="session-desc">Cowork workflows for delivery, reporting, and renewals</div></td><td><span class="fmt fmt-async">ASYNC</span> <span class="fmt fmt-live">LIVE</span> 45 min</td><td class="lead">Stef</td></tr>
+          <tr><td class="day">Wed</td><td><div class="session-name">Deep dive: QBR / deck building via Claude</div><div class="session-desc">Build a QBR deck end-to-end. Homework: mock QBR build. See Exercises tab.</div></td><td><span class="fmt fmt-async">ASYNC</span> <span class="fmt fmt-live">LIVE</span> 45 min</td><td class="lead">Laurel</td></tr>
+          <tr><td class="day">Wed</td><td><div class="session-name">Team introductions</div><div class="session-desc">Meet your pod AEs</div></td><td><span class="fmt fmt-live">LIVE</span></td><td class="lead">Pod AEs</td></tr>
+          <tr><td class="day">Thu</td><td><div class="session-name">Sales overview</div><div class="session-desc">High-level view of the AE workflow your accounts hand off from</div></td><td><span class="fmt fmt-async">ASYNC</span> <span class="fmt fmt-live">LIVE</span> 45 min</td><td class="lead">Marpo</td></tr>
+          <tr><td class="day">Thu</td><td><div class="session-name">Log off early</div><div class="session-desc">Enjoy the long weekend!</div></td><td>&mdash;</td><td class="lead">&mdash;</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div style="font-size:12px;color:#999;padding:12px 14px;background:#fff;border-radius:8px;border:1px solid #e8e8ee;line-height:1.6;">
+    <strong style="color:#92400e;">Still to confirm:</strong> your pod AE intros are TBD — Tyler will confirm at kickoff. The "Systems we use" session is owned by Marco, with Tyler as backup co-lead.
+  </div>
+
+</div>
+
+<!-- ==================== REFERENCE DATA ==================== -->
+<div id="reference" class="tab-content">
+
+  <div class="stats-bar">
+    <div class="stat-card"><div class="stat-value">7.1M+</div><div class="stat-label">Total Subscribers</div></div>
+    <div class="stat-card"><div class="stat-value">13</div><div class="stat-label">Newsletters</div></div>
+    <div class="stat-card"><div class="stat-value">~41%</div><div class="stat-label">Avg Open Rate</div></div>
+    <div class="stat-card"><div class="stat-value">40%</div><div class="stat-label">Executive Readers</div></div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Newsletter <span class="accent">Portfolio</span></div>
+    <div class="nl-grid">
+      <div class="nl-card"><div class="nl-name">TLDR</div><div class="nl-subs">1.6M</div><div class="nl-freq">Mon–Fri</div></div>
+      <div class="nl-card"><div class="nl-name">TLDR AI</div><div class="nl-subs">1.1M</div><div class="nl-freq">Mon–Fri</div></div>
+      <div class="nl-card"><div class="nl-name">TLDR IT</div><div class="nl-subs">570K</div><div class="nl-freq">Mon–Fri</div></div>
+      <div class="nl-card"><div class="nl-name">TLDR Data</div><div class="nl-subs">550K</div><div class="nl-freq">Mon &amp; Thu</div></div>
+      <div class="nl-card"><div class="nl-name">TLDR Dev</div><div class="nl-subs">460K</div><div class="nl-freq">Mon–Fri</div></div>
+      <div class="nl-card"><div class="nl-name">TLDR Fintech</div><div class="nl-subs">450K</div><div class="nl-freq">Mon &amp; Thu</div></div>
+      <div class="nl-card"><div class="nl-name">TLDR InfoSec</div><div class="nl-subs">400K</div><div class="nl-freq">Mon–Fri</div></div>
+      <div class="nl-card"><div class="nl-name">TLDR Product</div><div class="nl-subs">400K</div><div class="nl-freq">Tue &amp; Fri</div></div>
+      <div class="nl-card"><div class="nl-name">TLDR Founders</div><div class="nl-subs">380K</div><div class="nl-freq">Mon–Wed–Fri</div></div>
+      <div class="nl-card"><div class="nl-name">TLDR DevOps</div><div class="nl-subs">330K</div><div class="nl-freq">Mon–Wed–Fri</div></div>
+      <div class="nl-card"><div class="nl-name">TLDR Marketing</div><div class="nl-subs">310K</div><div class="nl-freq">Mon–Fri</div></div>
+      <div class="nl-card"><div class="nl-name">TLDR Design</div><div class="nl-subs">300K</div><div class="nl-freq">Mon–Fri</div></div>
+      <div class="nl-card"><div class="nl-name">TLDR Crypto</div><div class="nl-subs">280K</div><div class="nl-freq">Mon–Fri</div></div>
+    </div>
+    <div class="freshness" id="subscriber-counts-freshness">Subscriber counts from current media kit — Q2 2026</div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Placement <span class="accent">Types</span></div>
+    <div class="placement-grid">
+      <div class="placement-card"><div class="placement-name">Primary</div><div class="placement-desc">Top placement. Longest copy, company logo, prominent CTA link. Highest visibility and click volume.</div></div>
+      <div class="placement-card"><div class="placement-name">Secondary</div><div class="placement-desc">Mid-newsletter placement. Shorter copy, company logo, CTA link. Strong engagement at lower price point.</div></div>
+      <div class="placement-card"><div class="placement-name">Quick Link</div><div class="placement-desc">Brief one-line text link in the quick links section. Lowest cost, good for brand awareness and retargeting.</div></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Tool <span class="accent">Stack</span></div>
+    <div class="tool-grid">
+      <div class="tool-card"><div class="tool-name">HubSpot</div><div class="tool-purpose">CRM — renewal &amp; incremental deals, pipeline stages, contacts, companies, engagement history, rate cards.</div></div>
+      <div class="tool-card"><div class="tool-name">Sponsy</div><div class="tool-purpose">Ad inventory — placement availability, bookings, campaign data, click performance, IOs.</div></div>
+      <div class="tool-card"><div class="tool-name">Metabase</div><div class="tool-purpose">Subscriber analytics — audience counts, open/click rates, demographics, engagement trends.</div></div>
+      <div class="tool-card"><div class="tool-name">Attention</div><div class="tool-purpose">Call intelligence — meeting transcripts, follow-up drafts, scorecard results, call prep.</div></div>
+      <div class="tool-card"><div class="tool-name">Cowork / Claude</div><div class="tool-purpose">AI assistant — account research, reporting, QBR decks, renewal prep, performance analysis.</div></div>
+      <div class="tool-card"><div class="tool-name">Email Octopus</div><div class="tool-purpose">Email platform in the campaign workflow. Marco's systems session covers how it connects to sends and reporting.</div></div>
+      <div class="tool-card"><div class="tool-name">Windmill</div><div class="tool-purpose">Internal operations platform (a.k.a. "Windy"). Marco's systems session covers how it fits the AM workflow.</div></div>
+      <div class="tool-card"><div class="tool-name">Google Workspace</div><div class="tool-purpose">Docs, Sheets, Slides, Calendar — reports, QBR decks, shared documents, scheduling.</div></div>
+      <div class="tool-card"><div class="tool-name">Gamma</div><div class="tool-purpose">Presentation builder — create and share QBR decks and visual content.</div></div>
+    </div>
+    <div class="freshness">Tool stack adapted for the AM seat — confirm Email Octopus &amp; Windmill specifics in the systems session.</div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Top Sponsors <span class="accent">(Last 90 Days)</span></div>
+    <table class="data-table">
+      <thead><tr><th>Company</th><th>Placements</th><th>Total Clicks</th></tr></thead>
+      <tbody>
+        <tr><td>QA Wolf</td><td>26</td><td class="clicks">84,069</td></tr>
+        <tr><td>Wispr</td><td>21</td><td class="clicks">65,193</td></tr>
+        <tr><td>WorkOS</td><td>14</td><td class="clicks">37,679</td></tr>
+        <tr><td>Amazon Web Services (AWS)</td><td>15</td><td class="clicks">22,994</td></tr>
+        <tr><td>Unblocked</td><td>16</td><td class="clicks">20,661</td></tr>
+        <tr><td>Metronome</td><td>15</td><td class="clicks">20,049</td></tr>
+        <tr><td>Unwrap</td><td>9</td><td class="clicks">20,041</td></tr>
+        <tr><td>Lightfield</td><td>22</td><td class="clicks">19,725</td></tr>
+        <tr><td>Microsoft</td><td>11</td><td class="clicks">17,089</td></tr>
+        <tr><td>SerpApi</td><td>6</td><td class="clicks">16,765</td></tr>
+        <tr><td>1Password</td><td>16</td><td class="clicks">15,396</td></tr>
+        <tr><td>Clerk</td><td>22</td><td class="clicks">14,469</td></tr>
+        <tr><td>Notion</td><td>8</td><td class="clicks">13,785</td></tr>
+      </tbody>
+    </table>
+    <div class="freshness">From Sponsy — last 90 days as of June 9, 2026</div>
+  </div>
+
+</div>
+
+<!-- ==================== AM PLAYBOOK ==================== -->
+<div id="playbook" class="tab-content">
+
+  <div style="font-size:13px;color:#555;margin-bottom:16px;padding:14px 16px;background:#fff;border-radius:8px;border:1px solid #e8e8ee;line-height:1.7;">
+    The operating manual for the AM seat at TLDR. How we receive accounts, deliver campaigns, report on performance, renew, grow, and run QBRs. Built on the H2 2026 pod model: AEs quarterback, AMs lead post-sale.
+  </div>
+
+  <!-- 01 Operating Rhythm -->
+  <div class="card">
+    <div class="pb-section">
+      <div class="pb-section-header"><div class="pb-num">01</div><div class="pb-title">The Operating Rhythm</div></div>
+      <div class="pb-objective"><strong>Why it matters:</strong> Your habits plus company-wide rhythms — one place to see how the week, month, and quarter run.</div>
+      <table class="data-table">
+        <thead><tr><th>Cadence</th><th>What</th><th>Owner</th><th>Details</th></tr></thead>
+        <tbody>
+          <tr><td><strong>Daily</strong></td><td>Delivery checks + HubSpot hygiene</td><td>All AMs</td><td>Check live campaigns for delivery/pacing issues; update HubSpot — log calls, notes, next steps on renewals and incrementals.</td></tr>
+          <tr><td><strong>Weekly</strong></td><td>Pod sync</td><td>AE + AM</td><td>30 min with your pod AE: active campaigns, upcoming renewals (90-day horizon), expansion signals, at-risk accounts, handoff queue.</td></tr>
+          <tr><td><strong>Weekly</strong></td><td>AM team meeting</td><td>AM team</td><td>Team sync — delivery status, renewals, reporting, shared learnings.</td></tr>
+          <tr><td><strong>Weekly (Mon)</strong></td><td>TLDR Squared</td><td>All</td><td>Async team update every Monday in #team-full-time. The TLDR of TLDR — what's going on around the company.</td></tr>
+          <tr><td><strong>Weekly (Wed)</strong></td><td>Wednesday Drop</td><td>All</td><td>Async team update every Wednesday in #team-full-time. Process or policy changes in one central place.</td></tr>
+          <tr><td><strong>Weekly / Bi-weekly</strong></td><td>Manager 1:1</td><td>AM + Tyler</td><td>Standing check-in: book health, renewals, coaching, development.</td></tr>
+          <tr><td><strong>Bi-weekly</strong></td><td>Revenue Lab</td><td>Revenue team</td><td>Team learning: teardowns, deal reviews, competitive intel, new product features, guest speakers. Recordings in Resources tab.</td></tr>
+          <tr><td><strong>Monthly</strong></td><td>Revenue All-Hands</td><td>Managers + Val</td><td>Full revenue team meeting — pipeline review, quota progress, strategic updates, cross-functional alignment (AEs, AMs, ops).</td></tr>
+          <tr><td><strong>Quarterly</strong></td><td>Company All-Hands</td><td>All</td><td>Full TLDR team meeting — company performance, product updates, culture, cross-team visibility.</td></tr>
+          <tr><td><strong>2× / year</strong></td><td>Team Offsites</td><td>Team</td><td>In-person gatherings — strategy, planning, relationship-building, resetting for the next half.</td></tr>
+        </tbody>
+      </table>
+      <div class="pb-callout"><strong>Rule of thumb:</strong> If a renewal or incremental isn't in HubSpot by EOD, it doesn't exist. You own pipeline accuracy for renewal and incremental deals — both are reviewed in Monday reports.</div>
+    </div>
+  </div>
+
+  <!-- 02 Your Role in the Pod -->
+  <div class="card">
+    <div class="pb-section">
+      <div class="pb-section-header"><div class="pb-num">02</div><div class="pb-title">Your Role in the Pod</div></div>
+      <div class="pb-objective"><strong>Your mandate:</strong> Drive post-sale strategy, protect renewals, and grow incremental and LOB revenue within existing accounts. In the H2 2026 pod model, the AE quarterbacks the account; you are the post-sale lead. You're a pod, not a relay race.</div>
+      <div class="pb-h3"><span class="marker">2a</span> What you own</div>
+      <ul class="pb-ul">
+        <li>Campaign delivery — media plan execution with AdOps, creative strategy, flight scheduling, performance reporting</li>
+        <li>Renewals — lead the conversation and secure on-time renewals at or above current spend</li>
+        <li>Incremental bookings within the current buying center (add-on placements, newsletter expansion, timing extensions)</li>
+        <li>Post-campaign reporting — use performance data to anchor renewal and upsell conversations</li>
+        <li>Surface expansion signals (new LOBs, new stakeholders, budget shifts) to your AE for pursuit</li>
+        <li>Flag at-risk accounts and churn signals to the AE with a recommended save plan</li>
+      </ul>
+      <div class="pb-h3"><span class="marker">2b</span> AE vs. AM — who's the contact</div>
+      <div class="pb-card"><p><strong>AE is the strategic contact</strong> — exec-level conversations, pricing discussions, QBR narrative, annual planning.</p><p><strong>You're the operational contact</strong> — campaign logistics, creative, reporting, day-to-day requests.</p><p><strong>Never surprise your pod partner</strong> — if you hear something strategic on a call, relay it to the AE same day (and vice versa). Both of you are CC'd on shared-account emails.</p></div>
+      <div class="pb-h3"><span class="marker">2c</span> Incremental vs. expansion — drawing the line</div>
+      <div class="pb-p">This is the most common source of confusion. The rule:</div>
+      <div class="pb-card"><p><strong>You own — Incremental:</strong> same buying center, same budget holder, same LOB. Adding placements to an existing campaign, extending a flight, increasing frequency, adding Quick Links or takeover days to an existing IO.</p></div>
+      <div class="pb-card"><p><strong>AE owns — Expansion:</strong> new buying center or LOB, new budget holder not involved in the original sale, net-new use case, or anything requiring a new discovery cycle or proposal.</p></div>
+      <div class="pb-callout"><strong>Gray-area rule:</strong> If you're not sure, discuss it in your pod sync. Default to AE if it requires discovery or a new proposal; default to you if it's a natural extension of an existing commitment. Full detail in the <a class="pb-link" href="https://docs.google.com/document/u/0/d/1YQPBSF8EZgoP1LF1j425NOJ5YKh8JtJajF3gYsP3ZBQ/edit" target="_blank">Pod R&amp;R Explainer</a>.</div>
+    </div>
+  </div>
+
+  <!-- 03 Campaign Delivery & Launch -->
+  <div class="card">
+    <div class="pb-section">
+      <div class="pb-section-header"><div class="pb-num">03</div><div class="pb-title">Campaign Delivery &amp; Launch</div></div>
+      <div class="pb-objective"><strong>Objective:</strong> Take a closed deal from handoff to live campaign without a beat dropped. This is the lifecycle of a campaign.</div>
+      <div class="pb-h3"><span class="marker">3a</span> Receiving the handoff</div>
+      <ul class="pb-ul">
+        <li>The AE completes an internal handoff brief when the IO is signed: account context, buyer personas, strategic goals, and any commitments made during the sale.</li>
+        <li>Review it before kickoff. Anything unclear, raise it with the AE — don't guess.</li>
+      </ul>
+      <div class="pb-h3"><span class="marker">3b</span> Kickoff &amp; launch</div>
+      <ol class="pb-ol">
+        <li><strong>Kickoff call</strong> — co-led: the AE makes intros and frames strategy, you run the operational agenda. From here you own day-to-day client comms.</li>
+        <li><strong>Media plan finalization</strong> — AE approves; you own execution.</li>
+        <li><strong>Creative spec collection</strong> — you own.</li>
+        <li><strong>Inventory holds &amp; trafficking</strong> — you own, with Ad Ops.</li>
+        <li><strong>Launch QA</strong> — you own. Verify placement, links, and tracking before the issue ships.</li>
+      </ol>
+      <div class="pb-h3"><span class="marker">3c</span> During the flight</div>
+      <ul class="pb-ul">
+        <li>Run mid-campaign performance checks. Notify the AE of any underperformance early.</li>
+        <li>Own day-to-day client requests; loop the AE in only for strategic issues.</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- 04 Performance & Reporting -->
+  <div class="card">
+    <div class="pb-section">
+      <div class="pb-section-header"><div class="pb-num">04</div><div class="pb-title">Performance &amp; Reporting</div></div>
+      <div class="pb-objective"><strong>Objective:</strong> Turn campaign data into a story that anchors the renewal. The wrap report is the setup for the next conversation.</div>
+      <div class="pb-h3"><span class="marker">4a</span> Build the report</div>
+      <ul class="pb-ul">
+        <li>Use Cowork to pull placement performance, clicks, and CTOR, and to draft the client-facing report + email.</li>
+        <li>Anchor every number to the client's stated KPI from the original sale — not just raw clicks.</li>
+        <li>See the <a class="pb-link" href="https://docs.google.com/presentation/d/1ZUCOgeXVNVeZOsuTeKeme-_S6WudBIWq_2XPW0fYAig/edit?slide=id.p1#slide=id.p1" target="_blank">Measuring Success with Newsletters</a> framework.</li>
+      </ul>
+      <div class="pb-h3"><span class="marker">4b</span> Reframe last-click before they ask</div>
+      <ul class="pb-ul">
+        <li>Most buyers don't click. Push clients to also track brand-search lift, direct-traffic spikes, and sales-call mentions in the campaign window.</li>
+        <li>Offer the company-level click report (clicks/opens by domain) as proof of intent for ABM-leaning buyers.</li>
+        <li>Full playbook: <a class="pb-link" href="https://docs.google.com/document/d/1RQ7TSNy0lHYJLH7KEJEtw_sksZ33b--orG0tWuifU2c/edit?usp=sharing" target="_blank">Measurement Discovery + Challenging Last Click</a>.</li>
+      </ul>
+      <div class="pb-callout"><strong>Click discrepancies:</strong> We track via AWS SES server-side, which can't be blocked by ad blockers; their client-side pixel can. If a client's analytics show fewer clicks, recommend a link shortener on their end — it lines up much closer to our numbers.</div>
+    </div>
+  </div>
+
+  <!-- 05 Renewals, Incrementals & Expansion -->
+  <div class="card">
+    <div class="pb-section">
+      <div class="pb-section-header"><div class="pb-num">05</div><div class="pb-title">Renewals, Incrementals &amp; Expansion</div></div>
+      <div class="pb-objective"><strong>Objective:</strong> Protect and grow revenue in your book. Renew on time at or above current spend, close incrementals, and feed expansion to your AE.</div>
+      <div class="pb-h3"><span class="marker">5a</span> The renewal timeline</div>
+      <ol class="pb-ol">
+        <li><strong>90 days out</strong> — you own first touch. Brief the AE on your renewal strategy.</li>
+        <li><strong>Negotiation &amp; pricing</strong> — co-owned. You lead the ops; the AE leads pricing if it's contested or a significant change.</li>
+        <li><strong>Close &amp; IO</strong> — you own standard renewals. The AE owns it if there's a significant pricing change or churn risk.</li>
+      </ol>
+      <div class="pb-h3"><span class="marker">5b</span> At-risk &amp; churn</div>
+      <ul class="pb-ul">
+        <li>Flag risk early with a recommended save plan. The AE leads any exec-level intervention.</li>
+        <li>On churn, run a joint post-mortem with the AE.</li>
+      </ul>
+      <div class="pb-h3"><span class="marker">5c</span> Incrementals vs. expansion</div>
+      <ul class="pb-ul">
+        <li>Incremental (same buying center): you close and book it.</li>
+        <li>Expansion (new LOB / budget holder / use case): surface the signal, the AE takes the discovery call. Pricing beyond standard renewal authority goes through the AE / Deal Desk.</li>
+      </ul>
+      <div class="pb-callout"><strong>Pricing posture:</strong> We lead with value. Renewal and incremental pricing follows Deal Desk policy — escalate anything outside standard authority rather than discounting on your own.</div>
+    </div>
+  </div>
+
+  <!-- 06 QBRs -->
+  <div class="card">
+    <div class="pb-section">
+      <div class="pb-section-header"><div class="pb-num">06</div><div class="pb-title">Quarterly Business Reviews</div></div>
+      <div class="pb-objective"><strong>Objective:</strong> Make the client feel like they have a team, not a single point of contact — and set up the renewal.</div>
+      <div class="pb-h3"><span class="marker">6a</span> Who does what</div>
+      <ul class="pb-ul">
+        <li>The AE leads the strategic narrative — where the account is going, the growth plan.</li>
+        <li>You build the deck and the performance data, and build the renewal story. You co-present.</li>
+      </ul>
+      <div class="pb-h3"><span class="marker">6b</span> Build it with Cowork</div>
+      <ul class="pb-ul">
+        <li>Use the QBR / deck-building workflow (covered in Laurel's deep dive) to assemble data and slides fast.</li>
+        <li>Lead with the KPI story from the wrap report, then the growth recommendation.</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- 07 Objection Handling -->
+  <div class="card">
+    <div class="pb-section">
+      <div class="pb-section-header"><div class="pb-num">07</div><div class="pb-title">Objection Handling (Renewal &amp; Performance)</div></div>
+      <div class="pb-objective"><strong>Objective:</strong> Handle the objections that come up at renewal and in performance conversations — confidently and on-voice.</div>
+      <div class="pb-h3"><span class="marker">7a</span> The ones you'll hear most</div>
+      <ul class="pb-ul">
+        <li><strong>"The clicks didn't match our analytics."</strong> &rarr; Server-side vs. client-side tracking; recommend a link shortener (see section 04).</li>
+        <li><strong>"We didn't see ROI."</strong> &rarr; Reframe beyond last-click; bring brand-search lift, direct traffic, and the company-level click report.</li>
+        <li><strong>"It's too expensive to renew."</strong> &rarr; Lead with CPM efficiency vs. other channels and the performance story; escalate pricing levers through Deal Desk.</li>
+      </ul>
+      <div class="pb-p">Full library with real call examples and coaching notes: <a class="pb-link" href="https://docs.google.com/document/d/1bUipsV6rDICEnhYdUmkTL6Nj3wjxdBWpWqbxKO6q4a8/edit?tab=t.0#heading=h.tw65pkjffmnm" target="_blank">Objection Handling Playbook</a>.</div>
+    </div>
+  </div>
+
+  <!-- 08 Pipeline Hygiene & Forecast -->
+  <div class="card">
+    <div class="pb-section">
+      <div class="pb-section-header"><div class="pb-num">08</div><div class="pb-title">Pipeline Hygiene &amp; Forecast</div></div>
+      <div class="pb-objective"><strong>Objective:</strong> A clean pipeline is the only honest pipeline. You own accuracy for renewal and incremental deals.</div>
+      <div class="placeholder-banner"><strong>Confirm with Tyler / RevOps:</strong> The exact renewal/incremental pipeline stage names and forecast weights live in HubSpot and differ from the new-business pipeline. Drop them in here once confirmed — not estimated.</div>
+      <div class="pb-h3"><span class="marker">8a</span> The renewal pipeline (shape)</div>
+      <ul class="pb-ul">
+        <li>Renewal identified (90-day horizon) &rarr; renewal outreach &rarr; renewal proposal/negotiation &rarr; IO sent &rarr; renewed (or churned).</li>
+        <li>Incremental bookings run alongside as their own deals within the buying center.</li>
+      </ul>
+      <div class="pb-h3"><span class="marker">8b</span> Hygiene rules — every Friday</div>
+      <ul class="pb-ul">
+        <li>Every open renewal/incremental has a future close date — no past-dated deals.</li>
+        <li>Every open deal has a next step + next-step date.</li>
+        <li>Every renewal in negotiation+ has its criteria filled out.</li>
+        <li>Stuck deals (no activity in 30 days) get a save plan or move to the right stage.</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- 09 What Works -->
+  <div class="card">
+    <div class="pb-section">
+      <div class="pb-section-header"><div class="pb-num">09</div><div class="pb-title">What Works (Field Wisdom)</div></div>
+      <ul class="pb-ul">
+        <li><strong>Set expectations &amp; keep your word.</strong> "I'll send the report Thursday" &rarr; send it Thursday. Reliability is the whole job post-sale.</li>
+        <li><strong>Lead the renewal with the KPI, not the clicks.</strong> Tie performance back to what the client said success looked like.</li>
+        <li><strong>Surface expansion early.</strong> A new team or budget holder mentioned on a delivery call is a signal — flag it to your AE that day.</li>
+        <li><strong>Never let the client feel handed off.</strong> Warm intros only; the goal is to build the AE's relationship alongside yours, not replace yours.</li>
+        <li><strong>Calibrate, don't over-promise.</strong> "I expect this to perform at category average — here's what that means in clicks and CTOR."</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- 10 Performance Bar -->
+  <div class="card">
+    <div class="pb-section">
+      <div class="pb-section-header"><div class="pb-num">10</div><div class="pb-title">Performance Bar</div></div>
+      <div class="pb-objective"><strong>Why it matters:</strong> What "good" looks like for an AM at TLDR. Public bar so you always know where you stand.</div>
+      <div class="pb-p">AM metrics: renewal rate (gross and net dollar retention), incremental bookings within existing buying centers, campaign delivery quality (on-time, spec compliance, client satisfaction), and expansion signals surfaced to the AE. Reference the <a class="pb-link" href="https://docs.google.com/spreadsheets/d/1LrModNvhP7YMdg2bSNn2tM0VbYbgUs69IoJ6H0q9ZDQ/edit?gid=561626735#gid=561626735" target="_blank">leveling framework</a> for expectations by level.</div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ==================== RESOURCES ==================== -->
+<div id="resources" class="tab-content">
+
+  <div class="card">
+    <div class="card-title"><span class="accent">Resources</span></div>
+    <div style="font-size:13px;color:#555;margin-bottom:16px;padding:12px 14px;background:#f8f9fb;border-radius:8px;border:1px solid #e8e8ee;line-height:1.65;">
+      <strong>SME video prep:</strong> Short walkthroughs live on the
+      <button type="button" class="resource-tab-link" onclick="switchTab('smes')">Subject Matter Experts</button>
+      tab on each SME card. Watch the relevant ones <em>before</em> your live session or whenever you're ramping on that tool.
+    </div>
+
+    <div class="resource-category">
+      <div class="resource-cat-title"><span class="resource-cat-num">1.</span>Company &amp; Audience Foundations</div>
+      <div class="resource-cat-desc">The &quot;know TLDR&quot; set — read first.</div>
+      <div class="resource-item"><div><div class="resource-name">TLDR Business Model Overview</div><div class="resource-owner">What TLDR is, how we make money, who reads us, who sponsors us</div></div><a class="resource-link" href="https://docs.google.com/document/d/1FZB3jNrKawfCzGCEod8mO3TQYVgmdJ08IhLuVMabKPo/edit?tab=t.0#heading=h.5rcr0nwcevdn" target="_blank">Open</a></div>
+      <div class="resource-item"><div><div class="resource-name">TLDR ICP</div><div class="resource-owner">Ideal customer profile, contact personas, ICP by newsletter vertical, reference accounts</div></div><a class="resource-link" href="https://docs.google.com/document/d/1h3a_h0s_195ih9anV3oTmoET1e29La3ukeusDXDk_GY/edit?tab=t.0" target="_blank">Open</a></div>
+      <div class="resource-item"><div><div class="resource-name">Sales FAQ</div><div class="resource-owner">Pitch ammo — pricing, attribution, click-tracking, differentiators, testimonials</div></div><a class="resource-link" href="https://docs.google.com/document/d/1CWg4Qi-g2yyJMZVFQTxAZkTtBfeeCG0JWwIXWrkzl-Q/edit" target="_blank">Open</a></div>
+      <div class="resource-item"><div><div class="resource-name">Case Studies</div><div class="resource-owner">Advertiser success stories — use these to anchor renewals and expansion</div></div><a class="resource-link" href="https://advertise.tldr.tech/case-studies/" target="_blank">Open</a></div>
+    </div>
+
+    <div class="resource-category">
+      <div class="resource-cat-title"><span class="resource-cat-num">2.</span>GTM Policy &amp; Operating Model</div>
+      <div class="resource-cat-desc">Rules of the road, who owns what, how things flow.</div>
+      <div class="resource-item"><div><div class="resource-name">Pod R&amp;R Explainer</div><div class="resource-owner">AE / AM pod roles and responsibilities — your operating model. Start here.</div></div><a class="resource-link" href="https://docs.google.com/document/u/0/d/1YQPBSF8EZgoP1LF1j425NOJ5YKh8JtJajF3gYsP3ZBQ/edit" target="_blank">Open</a></div>
+      <div class="resource-item"><div><div class="resource-name">GTM Handbook</div><div class="resource-owner">Official source of truth for GTM operations</div></div><a class="resource-link" href="https://docs.google.com/document/d/1HmIAsEzYcHSBu83XS11XLdiPPA-qZUyguOurkr4s3qs/edit?usp=sharing" target="_blank">Open</a></div>
+      <div class="resource-item"><div><div class="resource-name">Rules of Engagement</div><div class="resource-owner">Account ownership, qualifying opportunities, dispute resolution</div></div><a class="resource-link" href="https://docs.google.com/document/d/1VALVx3mGRGZ3Z6j5Q1d81EbIQ2mH0ELpLHxuRNcjf1c/edit?tab=t.0#heading=h.h6ze4rfn43fb" target="_blank">Open</a></div>
+      <div class="resource-item"><div><div class="resource-name">Sales Career Ladder</div><div class="resource-owner">AE and AM leveling framework — competencies, steps, promotion gates</div></div><a class="resource-link" href="https://docs.google.com/spreadsheets/d/1LrModNvhP7YMdg2bSNn2tM0VbYbgUs69IoJ6H0q9ZDQ/edit?gid=561626735#gid=561626735" target="_blank">Open</a></div>
+    </div>
+
+    <div class="resource-category">
+      <div class="resource-cat-title"><span class="resource-cat-num">3.</span>AM Playbooks</div>
+      <div class="resource-cat-desc">The post-sale motions — delivery, performance, renewals.</div>
+      <div class="resource-item"><div><div class="resource-name">Multi-threading + AM Transitions</div><div class="resource-owner">How accounts hand off from AE to AM, and how to multi-thread relationships</div></div><a class="resource-link" href="https://docs.google.com/presentation/d/11W5OeTokzbDyHZzv2UsENzsSn_zmn0KCK31zqo-hlCk/edit?usp=sharing" target="_blank">Open</a></div>
+      <div class="resource-item"><div><div class="resource-name">Measuring Success with Newsletters</div><div class="resource-owner">Framework for evaluating newsletter ad performance — the basis for your reports</div></div><a class="resource-link" href="https://docs.google.com/presentation/d/1ZUCOgeXVNVeZOsuTeKeme-_S6WudBIWq_2XPW0fYAig/edit?slide=id.p1#slide=id.p1" target="_blank">Open</a></div>
+      <div class="resource-item"><div><div class="resource-name">Measurement Discovery + Challenging Last Click</div><div class="resource-owner">How to reframe beyond last-click attribution — critical at renewal</div></div><a class="resource-link" href="https://docs.google.com/document/d/1RQ7TSNy0lHYJLH7KEJEtw_sksZ33b--orG0tWuifU2c/edit?usp=sharing" target="_blank">Open</a></div>
+      <div class="resource-item"><div><div class="resource-name">Objection Handling</div><div class="resource-owner">Top objections with real call examples and coaching notes</div></div><a class="resource-link" href="https://docs.google.com/document/d/1bUipsV6rDICEnhYdUmkTL6Nj3wjxdBWpWqbxKO6q4a8/edit?tab=t.0#heading=h.tw65pkjffmnm" target="_blank">Open</a></div>
+    </div>
+
+    <div class="resource-category">
+      <div class="resource-cat-title"><span class="resource-cat-num">4.</span>Ad Products &amp; Creative</div>
+      <div class="resource-cat-desc">What we&apos;re actually delivering.</div>
+      <div class="resource-item"><div><div class="resource-name">Flex Placements Guide</div><div class="resource-owner">How flex placements work — a key tool for incremental growth</div></div><a class="resource-link" href="https://docs.google.com/presentation/u/0/d/1wobBdWvGx7Lkv3iG_q8qJG48lnXHtiy7/edit" target="_blank">Open</a></div>
+      <div class="resource-item"><div><div class="resource-name">Creative Best Practices</div><div class="resource-owner">Newsletter advertising best practices — coach your clients to better creative</div></div><a class="resource-link" href="https://advertise.tldr.tech/newsletter-advertising-best-practices/" target="_blank">Open</a></div>
+    </div>
+
+    <div class="resource-category">
+      <div class="resource-cat-title"><span class="resource-cat-num">5.</span>Deal Examples &amp; Ongoing Learning</div>
+      <div class="resource-cat-desc">Real deals, recurring training.</div>
+      <div class="resource-item"><div><div class="resource-name">Deal Post Mortem</div><div class="resource-owner">Three real deals broken down — including a renewal loss (Checkmarx)</div></div><a class="resource-link" href="https://docs.google.com/document/d/14ltBvysAMZrbV0IMbzNPj7Nm4mXMY1l_7P7Ykw5aUjA/edit?tab=t.0#heading=h.csj8x9yi4ksi" target="_blank">Open</a></div>
+      <div class="resource-item"><div><div class="resource-name">AM Team Meeting Decks</div><div class="resource-owner">Past AM team meeting decks — context on recurring themes and process</div></div><a class="resource-link" href="https://docs.google.com/presentation/d/1D3zJ1xaksS1U0CdQe736gRgbjA7zQKf3gLxO36E0uMA/edit" target="_blank">Open</a></div>
+      <div class="resource-item"><div><div class="resource-name">Previous Team Trainings</div><div class="resource-owner">Folder of past revenue team training sessions</div></div><a class="resource-link" href="https://drive.google.com/drive/folders/1agauF1QPUsCFAYcqtKjlZTikdflrMPUA?usp=sharing" target="_blank">Open</a></div>
+      <div class="resource-item"><div><div class="resource-name">Revenue Labs (2026)</div><div class="resource-owner">Revenue team training sessions</div></div><a class="resource-link" href="https://docs.google.com/presentation/d/1bXKz4ZYYvCDL81F8bkeqWLD6U7kNxXBj/edit?slide=id.g3db2ab13d8e_0_0#slide=id.g3db2ab13d8e_0_0" target="_blank">Open</a></div>
+    </div>
+
+    <div class="resource-category">
+      <div class="resource-cat-title"><span class="resource-cat-num">6.</span>Tools &amp; Setup</div>
+      <div class="resource-item"><div><div class="resource-name">Cowork Setup Checklist</div><div class="resource-owner">Step-by-step setup guide for Cowork and tools</div></div><a class="resource-link" href="https://drive.google.com/file/d/1auTEzhkdwC1wqEQqZkL6wSzOvYTB0Els/view?usp=drive_link" target="_blank">Open</a></div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ==================== EXERCISES ==================== -->
+<div id="exercises" class="tab-content">
+
+  <div class="card">
+    <div class="exercise-card">
+      <div class="exercise-week">Week 1</div>
+      <div class="exercise-title">AM Call Library</div>
+      <div class="exercise-desc">Watch four curated Attention calls across the AM motion. Take notes on what stood out — how the AM ran the conversation, handled the client, and set up next steps.</div>
+      <div class="exercise-placeholder"><strong>Ready.</strong> Watch these four:
+        <a href="https://app.attention.tech/conversations/all-calls/8c716ee8-3913-4e8c-998f-46adde7bcd70?activeTabId=coaching-tab-conversation" target="_blank" style="color:#d513eb;">Agency Partnership</a> ·
+        <a href="https://app.attention.tech/conversations/all-calls/06a04a31-1296-4977-8272-59d248f43d25?activeTabId=crm-tab-conversation" target="_blank" style="color:#d513eb;">AM-Led Performance Check-in</a> ·
+        <a href="https://app.attention.tech/conversations/all-calls/9b6c95fe-ff2e-4cfd-968f-6c83dbf91fda" target="_blank" style="color:#d513eb;">Kickoff Call</a> ·
+        <a href="https://app.attention.tech/conversations/all-calls/d2bf17fa-c7f4-464a-8fee-9a6e5a34e2e3?activeTabId=coaching-tab-conversation" target="_blank" style="color:#d513eb;">AE/AM Renewal Collab</a>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="exercise-card">
+      <div class="exercise-week">Week 1</div>
+      <div class="exercise-title">Mock Renewal Deal in HubSpot</div>
+      <div class="exercise-desc">Practice building out a renewal deal in HubSpot end-to-end — stages, activity logging, next steps. Pairs with Stef's HubSpot / Sponsy deep dive.</div>
+      <div class="exercise-placeholder">Exercise doc to come — Stef will share during the deep dive. (Placeholder: add link once finalized.)</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="exercise-card">
+      <div class="exercise-week">Week 2</div>
+      <div class="exercise-title">Mock Client Report + Email</div>
+      <div class="exercise-desc">Build a client-facing performance report and the email that delivers it. Pairs with Laura's reporting session.</div>
+      <div class="exercise-placeholder">Exercise doc to come — Laura will share during the reporting session. (Placeholder: add link once finalized.)</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="exercise-card">
+      <div class="exercise-week">Week 2</div>
+      <div class="exercise-title">Mock QBR Build</div>
+      <div class="exercise-desc">Build a QBR deck end-to-end using Cowork. Pairs with Laurel's QBR / deck-building deep dive.</div>
+      <div class="exercise-placeholder">Exercise doc to come — Laurel will share during the deep dive. (Placeholder: add link once finalized.)</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="exercise-card">
+      <div class="exercise-week">Week 2</div>
+      <div class="exercise-title">Objection Role-Play (Renewal &amp; Performance)</div>
+      <div class="exercise-desc">Role-play the objections you'll hear at renewal and in performance conversations — attribution, click discrepancies, pricing.</div>
+      <div class="exercise-placeholder"><strong>Ready.</strong> Use the <a href="https://docs.google.com/document/d/1bUipsV6rDICEnhYdUmkTL6Nj3wjxdBWpWqbxKO6q4a8/edit?tab=t.0#heading=h.tw65pkjffmnm" target="_blank" style="color:#d513eb;">Objection Handling Playbook</a> — focus on the attribution, last-click, and pricing categories.</div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ==================== SUBJECT MATTER EXPERTS ==================== -->
+<div id="smes" class="tab-content">
+
+  <p style="font-size:14px;color:#555;margin-bottom:12px;line-height:1.65;">Each SME owns a live session with you and recorded walkthroughs where noted. They're your go-to for questions in their domain.</p>
+  <p style="font-size:14px;color:#555;margin-bottom:16px;line-height:1.65;"><strong>When to watch:</strong> Open the videos on an SME's card <em>before</em> the session where you meet them (see Program Schedule), or any time you're ramping on that tool.</p>
+
+  <div class="sme-grid">
+    <div class="sme-card"><div class="sme-domain">AM Team &amp; Role</div><div class="sme-name">Tyler</div><div class="sme-topics"><div class="sme-topic-item">Role expectations, lifecycle of a campaign, Sponsy. Your manager and first point of contact.</div></div><div class="sme-links"><a href="https://drive.google.com/file/d/1MxPjI_C9_SSQAt709x5igqVogpNRqUJH/view?usp=drive_link" target="_blank">Sponsy video</a></div></div>
+    <div class="sme-card"><div class="sme-domain">HubSpot &amp; Claude Workflows</div><div class="sme-name">Stef</div><div class="sme-topics"><div class="sme-topic-item">HubSpot / Sponsy from the AM seat, plus how the AM team uses Claude.</div></div></div>
+    <div class="sme-card"><div class="sme-domain">Reporting</div><div class="sme-name">Laura</div><div class="sme-topics"><div class="sme-topic-item">Client-facing performance reports and the email that delivers them.</div></div></div>
+    <div class="sme-card"><div class="sme-domain">QBR / Deck Building</div><div class="sme-name">Laurel</div><div class="sme-topics"><div class="sme-topic-item">Building QBR decks via Claude — data, slides, and the renewal story.</div></div></div>
+    <div class="sme-card"><div class="sme-domain">HubSpot</div><div class="sme-name">Riley</div><div class="sme-links"><a href="https://drive.google.com/file/d/120Fst-4mmstEv_wSJNSUmTkuhzHJey6F/view" target="_blank">Video</a> <a href="https://docs.google.com/document/d/1RwW_5u5bKCeZj3dy7w9OxqBChJx_5_H4ZI027zawZj8/edit?usp=sharing" target="_blank">Deal creation one-pager</a></div></div>
+    <div class="sme-card"><div class="sme-domain">Systems Integration</div><div class="sme-name">Marco</div><div class="sme-topics"><div class="sme-topic-item">How the AM stack connects — HubSpot, Sponsy, Email Octopus, Metabase, Windmill, Attention.</div></div></div>
+    <div class="sme-card"><div class="sme-domain">Cowork</div><div class="sme-name">Upashruti</div><div class="sme-topics"><div class="sme-topic-item">Cowork setup, plugins, and slash commands.</div></div></div>
+    <div class="sme-card"><div class="sme-domain">Audience &amp; Portfolio</div><div class="sme-name">Pri</div><div class="sme-links"><a href="https://www.loom.com/share/d2728cb4111a441ab48cb34d25e48756" target="_blank">Portfolio &amp; audiences (1/2)</a> <a href="https://www.loom.com/share/83fe39d6b96d44239b317af3294fab53" target="_blank">Portfolio &amp; audiences (2/2)</a></div></div>
+    <div class="sme-card"><div class="sme-domain">Sales Overview</div><div class="sme-name">Marpo</div><div class="sme-topics"><div class="sme-topic-item">How the AE workflow your accounts hand off from works.</div></div><div class="sme-links"><a href="https://docs.google.com/presentation/d/163Y8iJZkhQwKvkVJzagg3ho4Skf93wMCqy56oLoIADU/edit?slide=id.p6#slide=id.p6" target="_blank">Sales motion deck</a></div></div>
+  </div>
+
+</div>
+
+<script>
+function switchTab(tabId) {
+  document.querySelectorAll('.tab').forEach(function (t) { t.classList.remove('active'); });
+  document.querySelectorAll('.tab-content').forEach(function (c) { c.classList.remove('active'); });
+  var panel = document.getElementById(tabId);
+  if (panel) panel.classList.add('active');
+  document.querySelectorAll('.tab').forEach(function (t) {
+    var oc = t.getAttribute('onclick') || '';
+    if (oc.indexOf("switchTab('" + tabId + "')") !== -1) t.classList.add('active');
+  });
+}
+function toggleWeek(el) {
+  if (event.target.closest('a')) return;
+  if (event.target.closest('.week-body') && !event.target.closest('.week-header')) return;
+  el.classList.toggle('collapsed');
+}
+</script>
+
+</body>
+</html>
